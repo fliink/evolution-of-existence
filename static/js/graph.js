@@ -81,7 +81,7 @@
         b.degree++;
       }
       for (const n of nodes) {
-        const base = n.kind === 'pillar' ? 9 : n.kind === 'tag' ? 3.5 : 5;
+        const base = n.kind === 'pillar' ? 9 : n.kind === 'tag' || n.kind === 'thought' ? 3.5 : 5;
         n.r = base + Math.min(7, Math.sqrt(n.degree) * 1.6);
       }
       const focus = focusId && byId.get(focusId);

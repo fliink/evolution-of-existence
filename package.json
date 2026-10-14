@@ -6,7 +6,10 @@
   "scripts": {
     "build": "node build.js",
     "dev": "node serve.js",
-    "new": "node new-post.js"
+    "new": "node new-post.js",
+    "studio": "node studio/server.js",
+    "studio:github": "node studio/server.js --github",
+    "studio:deploy": "fly deploy"
   },
   "engines": {
     "node": ">=18"

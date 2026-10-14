@@ -1,0 +1,32 @@
+# Fly.io config for the studio (studio/). It lives at the repo root because the
+# Docker build needs lib/ as well as studio/. Deploy with:
+#   fly deploy
+#
+# Secrets are never written here. Set them once with:
+#   fly secrets set GITHUB_TOKEN=... GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... SESSION_SECRET=...
+
+app = "eoe-studio"
+primary_region = "sjc"      # nearest region to you; `fly platform regions` lists them
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  STUDIO_MODE = "github"
+  GITHUB_REPO = "fliink/evolution-of-existence"
+  GITHUB_BRANCH = "main"
+  BASE_URL = "https://write.evolutionofexistence.com"
+  SITE_URL = "https://evolutionofexistence.com"
+  ALLOWED_EMAILS = "adam.d.flink@gmail.com"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"   # scales to zero when idle; wakes on the first request
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

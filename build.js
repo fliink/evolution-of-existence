@@ -81,6 +81,8 @@ function build(opts = {}) {
   const site = fresh('site.config.js');
   const md = fresh('lib/markdown.js');
   const X = fresh('lib/explore.js');
+  const C = fresh('lib/context.js');
+  const TH = fresh('lib/thoughts.js');
   const T = fresh('templates.js');
   const includeDrafts = Boolean(opts.drafts);
   const dev = Boolean(opts.dev);
@@ -125,6 +127,8 @@ function build(opts = {}) {
         tags: normalizeTags(data.tags, md.slugify, pillarBySlug),
         summary: data.summary || '',
         draft: data.draft === true,
+        context: C.pickContext(data),
+        moon: C.moonPhase(when.date),
       };
     })
     .filter((p) => includeDrafts || !p.draft)
@@ -179,6 +183,33 @@ function build(opts = {}) {
     page.lede = page.lede || pillar.blurb;
   }
 
+  // Thoughts: short dated notes, one Markdown file per month, newest first.
+  const thoughts = listMarkdown(path.join(CONTENT, 'thoughts'))
+    .flatMap((file) =>
+      TH.parse(read(file)).map((t) => {
+        const date = TH.dateOf(t.stamp);
+        const month = TH.monthOf(t.stamp);
+        return {
+          ...t,
+          kind: 'thought',
+          file,
+          date,
+          isoDate: t.stamp.slice(0, 10),
+          month,
+          dateText: longDate(date),
+          timeText: C.formatTime(t.stamp.slice(11, 16)),
+          url: `/thoughts/${month}/#${t.id}`,
+          tags: [],
+        };
+      })
+    )
+    .sort((a, b) => b.date - a.date);
+  for (const t of thoughts) t.title = `Thought · ${t.dateText}, ${t.timeText}`;
+  const thoughtMonths = [...new Set(thoughts.map((t) => t.month))]
+    .sort()
+    .reverse()
+    .map((month) => ({ month, url: `/thoughts/${month}/`, count: thoughts.filter((t) => t.month === month).length }));
+
   // 3. Render everything. [[wikilinks]] resolve by slug, by title, or by slugified title.
   const entries = [...posts, ...pages];
   const byKey = new Map();
@@ -192,20 +223,23 @@ function build(opts = {}) {
     register(md.slugify(e.title), e);
   }
   const unresolved = [];
+  const resolverFor = (owner) => (target) => {
+    const hit = byKey.get(target.trim().toLowerCase()) || byKey.get(md.slugify(target)) || null;
+    if (!hit) unresolved.push(`[[${target}]] in ${owner.file ? path.relative(ROOT, owner.file) : owner.url}`);
+    return hit;
+  };
   for (const e of entries) {
-    e.html = md.render(e.body || '', {
-      resolveWikilink: (target) => {
-        const hit = byKey.get(target.trim().toLowerCase()) || byKey.get(md.slugify(target)) || null;
-        if (!hit) unresolved.push(`[[${target}]] in ${e.file ? path.relative(ROOT, e.file) : e.url}`);
-        return hit;
-      },
-    });
+    e.html = md.render(e.body || '', { resolveWikilink: resolverFor(e) });
     e.text = md.toText(e.html);
     if (e.kind === 'post') {
       e.summary = e.summary || md.excerpt(e.html);
       e.readingTime = Math.max(1, Math.round(e.text.split(/\s+/).filter(Boolean).length / 220));
     }
     delete e.body;
+  }
+  for (const t of thoughts) {
+    t.html = md.render(t.body, { resolveWikilink: resolverFor(t) });
+    t.text = md.toText(t.html);
   }
   posts.forEach((p, i) => {
     p.newer = posts[i - 1] || null;
@@ -229,7 +263,7 @@ function build(opts = {}) {
   // 5. The web: which entries link to which (via [[wikilinks]] or ordinary links),
   //    the backlinks that follow from it, and the word counts for the cloud.
   const byUrl = new Map(entries.map((e) => [e.url, e]));
-  for (const e of entries) {
+  for (const e of [...entries, ...thoughts]) {
     const seen = new Set();
     e.links = [];
     for (const m of e.html.matchAll(/href="(\/[^"#?]*)"/g)) {
@@ -241,10 +275,10 @@ function build(opts = {}) {
       }
     }
   }
-  for (const e of entries) e.backlinks = entries.filter((o) => o.links.includes(e));
-  const graph = X.buildGraph(entries, pillars, tags);
+  for (const e of entries) e.backlinks = [...entries, ...thoughts].filter((o) => o.links.includes(e));
+  const graph = X.buildGraph(entries, pillars, tags, thoughts.filter((t) => t.links.length));
   const words = X.buildWords(
-    entries.filter((e) => explore.wordsFrom === 'all' || e.kind === 'post'),
+    [...entries.filter((e) => explore.wordsFrom === 'all' || e.kind === 'post'), ...thoughts],
     explore
   );
 
@@ -258,6 +292,9 @@ function build(opts = {}) {
     pillars,
     graph,
     words,
+    contextStats: C.contextStats(posts),
+    thoughts,
+    thoughtMonths,
     now: pages.find((p) => p.slug === 'now') || null,
     buildDate: new Date(),
     neighborhood: (entry) => X.neighborhood(entry, graph),
@@ -276,6 +313,9 @@ function build(opts = {}) {
   emit('tags/index.html', T.tags(ctx));
   for (const tag of tags) emit(`tags/${tag.slug}/index.html`, T.tag({ ...ctx, tag }));
   emit('explore/index.html', T.explore(ctx));
+  emit('thoughts/index.html', T.thoughts(ctx));
+  for (const m of thoughtMonths) emit(`thoughts/${m.month}/index.html`, T.thoughtsMonth({ ...ctx, month: m }));
+  emit('thoughts.xml', T.thoughtsFeed(ctx));
   emit('404.html', T.notFound(ctx));
   emit('feed.xml', T.feed(ctx));
   emit('sitemap.xml', T.sitemap(ctx));
@@ -286,7 +326,7 @@ function build(opts = {}) {
   const drafts = posts.filter((p) => p.draft).length;
   const linkCount = graph.edges.filter((e) => e.kind === 'link').length;
   console.log(
-    `built ${count} pages (${posts.length} posts${drafts ? `, ${drafts} draft` : ''}, ${pages.length} pages, ${pillars.length} pillars, ${tags.length} tags, ${linkCount} links, ${words.words.length} cloud words) in ${Date.now() - started}ms -> dist/`
+    `built ${count} pages (${posts.length} posts${drafts ? `, ${drafts} draft` : ''}, ${pages.length} pages, ${thoughts.length} thoughts, ${pillars.length} pillars, ${tags.length} tags, ${linkCount} links, ${words.words.length} cloud words) in ${Date.now() - started}ms -> dist/`
   );
   return ctx;
 }

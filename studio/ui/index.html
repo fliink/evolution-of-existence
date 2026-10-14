@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d12'/%3E%3Ccircle cx='32' cy='32' r='21' fill='%238f7dff'/%3E%3Ccircle cx='39' cy='26' r='16' fill='%230b0d12'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/studio.css">
+</head>
+<body>
+<div id="app" class="app">
+  <header class="bar">
+    <button class="icon-btn" id="toggle-list" type="button" aria-label="Show entries">☰</button>
+    <span class="brand">Studio</span>
+    <span id="status" class="status" aria-live="polite"></span>
+    <div class="bar-actions">
+      <span id="counts" class="counts muted small"></span>
+      <button id="btn-preview" class="btn" type="button" aria-pressed="false">Preview</button>
+      <button id="btn-save" class="btn primary" type="button" disabled>Save</button>
+      <a id="link-site" class="btn ghost" href="/" target="_blank" rel="noopener">View site</a>
+      <button id="btn-logout" class="btn ghost" type="button" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <aside class="list" id="list">
+    <div class="list-head">
+      <input id="filter" type="search" placeholder="Filter" aria-label="Filter entries" autocomplete="off">
+      <button id="btn-new" class="btn primary small" type="button">New post</button>
+      <button id="btn-new-page" class="btn ghost small" type="button" title="New page">+ page</button>
+    </div>
+    <button id="btn-thoughts" class="side-tab" type="button">Thoughts <span class="muted small">quick notes, no title</span></button>
+    <nav id="entries" aria-label="Entries"></nav>
+  </aside>
+
+  <main class="editor" id="editor">
+    <div class="empty" id="empty">
+      <h1>Pick something to edit, or start a new post.</h1>
+      <p>Write in Markdown. Type <code>[[</code> to link to another post or page. Paste or drop an image to upload it. New posts start as drafts; use the Draft button to publish. Saving commits to the site.</p>
+    </div>
+
+    <div class="pane-wrap" id="pane" hidden>
+      <div class="details" id="details">
+        <div class="details-head">
+          <span id="path" class="path"></span>
+          <div class="tools">
+            <button class="btn small" id="btn-details" type="button" aria-expanded="false">Details</button>
+            <button class="btn small" id="btn-draft" type="button">Draft</button>
+            <button class="btn small" id="btn-raw" type="button" aria-pressed="false" title="Edit the whole file, frontmatter included">Raw</button>
+            <button class="btn small danger" id="btn-delete" type="button" title="Delete this file">Delete</button>
+          </div>
+        </div>
+        <div class="fields" id="fields"></div>
+      </div>
+
+      <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
+        <button type="button" data-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button type="button" data-fmt="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button type="button" data-fmt="h2" title="Heading">H2</button>
+        <button type="button" data-fmt="h3" title="Subheading">H3</button>
+        <button type="button" data-fmt="quote" title="Quote">&ldquo;&nbsp;&rdquo;</button>
+        <button type="button" data-fmt="ul" title="Bullet list">&bull; list</button>
+        <button type="button" data-fmt="ol" title="Numbered list">1. list</button>
+        <button type="button" data-fmt="code" title="Code">&lt;/&gt;</button>
+        <button type="button" data-fmt="link" title="Link (Ctrl+K)">link</button>
+        <button type="button" data-fmt="wikilink" title="Link to a post or page (or type [[)">[[ ]]</button>
+        <label class="tb" title="Upload an image. You can also paste or drop one into the text.">image<input type="file" id="file-image" accept="image/*" hidden></label>
+        <button type="button" data-fmt="hr" title="Divider">&mdash;</button>
+      </div>
+
+      <div class="panes" id="panes">
+        <textarea id="text" spellcheck="true" autocapitalize="sentences" placeholder="Write…"></textarea>
+        <div id="preview" class="preview prose" hidden></div>
+      </div>
+    </div>
+
+    <div id="thoughts" class="thoughts" hidden>
+      <div class="compose">
+        <textarea id="thought-text" rows="4" spellcheck="true" autocapitalize="sentences" placeholder="What's on your mind? Markdown and [[links]] work."></textarea>
+        <div class="compose-bar">
+          <span class="muted small">Goes straight to the site. Ctrl+Enter to post.</span>
+          <button id="btn-post" class="btn primary small" type="button">Post</button>
+        </div>
+      </div>
+      <div id="thought-stream" class="thought-stream"></div>
+    </div>
+  </main>
+
+  <div id="login" class="login" hidden>
+    <div class="card">
+      <h1>Studio</h1>
+      <p>The private writing room for Evolution of Existence.</p>
+      <a class="btn primary" href="/auth/login">Sign in with Google</a>
+    </div>
+  </div>
+
+  <div id="picker" class="picker" hidden></div>
+</div>
+<script src="/lib/markdown.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

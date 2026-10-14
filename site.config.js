@@ -40,6 +40,7 @@ module.exports = {
     { label: 'Body', href: '/body/' },
     { label: 'Spirit', href: '/spirit/' },
     { label: 'Blog', href: '/blog/' },
+    { label: 'Thoughts', href: '/thoughts/' },
     { label: 'Explore', href: '/explore/' },
     { label: 'Journey', href: '/journey/' },
     { label: 'About', href: '/about/' },
@@ -63,6 +64,13 @@ module.exports = {
   // { label: 'GitHub', href: 'https://github.com/yourname' },
   links: [{ label: 'Now', href: '/now/' }],
 
-  // How many posts the home page shows.
+  // How many posts and thoughts the home page shows.
   recentPosts: 5,
+  recentThoughts: 3,
+  thoughtsOnPage: 50, // /thoughts/ shows this many; older ones live on the month pages
+
+  // The "while writing" line on posts: time, place, weather, what was playing.
+  // The studio fills these in; see lib/context.js for the frontmatter keys.
+  showMoon: true,      // add the moon phase, computed from the post date
+  units: 'imperial',   // 'imperial' (°F, mph) or 'metric' (°C, km/h) for fetched weather
 };

@@ -1,4 +1,5 @@
 dist/
 node_modules/
+studio/.env
 .DS_Store
 Thumbs.db

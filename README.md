@@ -50,6 +50,12 @@ Optional frontmatter keys:
 | `slug`    | Override the URL segment                                            |
 | `updated` | `YYYY-MM-DD`, shows a "last updated" line and feeds into the sitemap |
 | `draft`   | `true` hides the post from `npm run build`; the dev server still shows it |
+| `time`    | `22:40`, when the writing started; shown as "Written at 10:40 pm"        |
+| `place`   | Where you were, city level is plenty                                 |
+| `weather` | Free text, e.g. `52°F, light drizzle`; the studio can fetch it       |
+| `listening`, `watching`, `reading`, `mood` | What was on while you wrote, free text |
+
+The last group renders as a quiet "while writing" line under the title, together with the moon phase computed from the date (turn that off with `showMoon: false` in the config). Albums, shows and books also roll up on `/explore/` with links back to the posts.
 
 ### Pages
 
@@ -84,6 +90,17 @@ Every post and page that is linked to anything gets a **Connections** section: a
 - **Words**: the words used most across your posts, sized by frequency. Click a word to list every entry that uses it and how often; the choice goes in the URL hash so `/explore/#existence` is shareable. A search box narrows the cloud.
 
 Tune it in the `explore` block of `site.config.js`: how many words, the minimum number of entries a word must appear in, extra stopwords, and whether pages count. Drafts are included in the dev server and excluded from production builds, graph and all.
+
+### Thoughts
+
+Short notes without titles, the stream next to the blog. They live in one Markdown file per month under `content/thoughts/`, each entry a timestamp heading and a body:
+
+```markdown
+## 2026-10-14 22:46:05
+The thought. Markdown and [[wikilinks]] work.
+```
+
+They render at `/thoughts/` (newest first, with month archives), the newest few show on the home page, there's a separate feed at `/thoughts.xml`, and a thought that links to a post appears in that post's backlinks and in the graph. The studio has a compose box for them; by hand, just append to the month file.
 
 ### Markdown support
 

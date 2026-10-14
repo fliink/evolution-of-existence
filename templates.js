@@ -5,6 +5,8 @@
  * just JavaScript template literals. Markup lives here, styles in static/css.
  */
 
+const { formatTime } = require('./lib/context.js');
+
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -81,6 +83,22 @@ ${posts
 </ol>`;
 }
 
+/** The quiet line under a post's title: when, where, weather, moon, media. */
+function contextLine(post, site) {
+  const c = post.context || {};
+  const items = [];
+  const when = [c.time ? `at ${esc(formatTime(c.time))}` : '', c.place ? `in ${esc(c.place)}` : ''].filter(Boolean).join(' ');
+  if (when) items.push(`Written ${when}`);
+  if (c.weather) items.push(esc(c.weather));
+  if (site.showMoon !== false && post.moon) items.push(`${esc(post.moon.name)} moon`);
+  if (c.listening) items.push(`Listening to ${esc(c.listening)}`);
+  if (c.watching) items.push(`Watching ${esc(c.watching)}`);
+  if (c.reading) items.push(`Reading ${esc(c.reading)}`);
+  if (c.mood) items.push(`Feeling ${esc(c.mood)}`);
+  if (!items.length) return '';
+  return `<ul class="context" aria-label="While writing">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+}
+
 function postNav(post) {
   if (!post.older && !post.newer) return '';
   const link = (p, cls, label) =>
@@ -104,7 +122,7 @@ function connections(ctx, entry) {
 
   const list = (items) =>
     `<ul>${items
-      .map((e) => `<li><a href="${e.url}">${esc(e.title)}</a>${e.kind === 'page' ? ' <span class="kind">page</span>' : ''}</li>`)
+      .map((e) => `<li><a href="${e.url}">${esc(e.title)}</a>${e.kind === 'page' ? ' <span class="kind">page</span>' : e.kind === 'thought' ? ' <span class="kind">thought</span>' : ''}</li>`)
       .join('')}</ul>`;
 
   const html = `<section class="connections">
@@ -155,6 +173,7 @@ function layout(ctx, { title, description, url, type = 'website', content, bodyC
 <meta name="theme-color" content="#0b0d12">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="${esc(site.title)}" href="/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="${esc(site.title)}: thoughts" href="/thoughts.xml">
 <link rel="stylesheet" href="/css/style.css">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
@@ -188,7 +207,7 @@ ${dev ? LIVE_RELOAD : ''}
 /* ---------- pages ---------- */
 
 function home(ctx) {
-  const { site, posts, now, pillars } = ctx;
+  const { site, posts, now, pillars, thoughts = [] } = ctx;
   const buttons = (site.heroLinks || [])
     .map((b) => `<a class="btn${b.primary ? ' primary' : ''}" href="${b.href}">${esc(b.label)}</a>`)
     .join('');
@@ -205,15 +224,25 @@ ${pillarCards(pillars)}
     <div class="section-head"><h2>Recent writing</h2><a href="/blog/">All posts →</a></div>
     ${posts.length ? postList(posts.slice(0, site.recentPosts || 5)) : '<p class="muted">Nothing here yet. The first post is on its way.</p>'}
   </section>
-  ${
-    now
-      ? `<aside class="now card">
-    <div class="section-head"><h2>Now</h2>${now.updated ? `<time class="muted small" datetime="${now.updated.iso}">${esc(longDate(now.updated.date))}</time>` : ''}</div>
-    <div class="prose compact">${now.html}</div>
-    <p class="small"><a href="/now/">Full now page →</a></p>
-  </aside>`
-      : ''
-  }
+  <div class="home-side">
+    ${
+      thoughts.length
+        ? `<aside class="lately card">
+      <div class="section-head"><h2>Lately</h2><a href="/thoughts/">All thoughts →</a></div>
+      ${thoughts.slice(0, site.recentThoughts || 3).map(thoughtCard).join('\n')}
+    </aside>`
+        : ''
+    }
+    ${
+      now
+        ? `<aside class="now card">
+      <div class="section-head"><h2>Now</h2>${now.updated ? `<time class="muted small" datetime="${now.updated.iso}">${esc(longDate(now.updated.date))}</time>` : ''}</div>
+      <div class="prose compact">${now.html}</div>
+      <p class="small"><a href="/now/">Full now page →</a></p>
+    </aside>`
+        : ''
+    }
+  </div>
 </div>`;
   return layout(ctx, { url: '/', content, bodyClass: 'home' });
 }
@@ -226,6 +255,7 @@ function post(ctx) {
     <p class="meta"><time datetime="${post.isoDate}">${esc(post.dateText)}</time><span class="dot">·</span><span>${post.readingTime} min read</span>${post.draft ? '<span class="dot">·</span><span class="draft-badge">draft</span>' : ''}</p>
     <h1>${esc(post.title)}</h1>
     ${post.tags.length ? `<div class="tags">${tagChips(post.tags)}</div>` : ''}
+    ${contextLine(post, ctx.site)}
   </header>
   <div class="prose">
 ${post.html}
@@ -286,6 +316,31 @@ ${page.html}
   });
 }
 
+function contextSection(ctx) {
+  const stats = ctx.contextStats || {};
+  const groups = [
+    ['listening', 'Soundtrack', 'What was playing while these were written.'],
+    ['watching', 'On screen', 'What was on at the time.'],
+    ['reading', 'On the shelf', 'What was being read alongside.'],
+  ].filter(([key]) => (stats[key] || []).length);
+  if (!groups.length) return '';
+  const list = (items) =>
+    `<ul class="context-list">${items
+      .map(
+        (it) =>
+          `<li><span class="value">${esc(it.value)}</span><span class="where">${it.posts
+            .map((p) => `<a href="${p.url}">${esc(p.title)}</a>`)
+            .join(', ')}</span></li>`
+      )
+      .join('')}</ul>`;
+  return `<section class="section explore-context">
+  <div class="section-head"><h2>Around the writing</h2></div>
+  <div class="context-groups">
+${groups.map(([key, title, blurb]) => `    <div><h3>${title}</h3><p class="muted small">${blurb}</p>${list(stats[key])}</div>`).join('\n')}
+  </div>
+</section>`;
+}
+
 function explore(ctx) {
   const { pillars, graph, words } = ctx;
   const linkCount = graph.edges.filter((e) => e.kind === 'link').length;
@@ -309,7 +364,7 @@ function explore(ctx) {
   </div>
   <p class="muted small">${entryCount} entr${entryCount === 1 ? 'y' : 'ies'}, ${linkCount} link${linkCount === 1 ? '' : 's'} between them. Drag to move, scroll to zoom, click a node to open it.</p>
   <div class="graph-wrap"><canvas id="graph" class="graph" data-graph="graph-data" data-height="560"></canvas></div>
-  <ul class="graph-legend">${legend}<li><span class="swatch post"></span>Post</li><li><span class="swatch page"></span>Page</li><li><span class="swatch tag"></span>Tag</li></ul>
+  <ul class="graph-legend">${legend}<li><span class="swatch post"></span>Post</li><li><span class="swatch page"></span>Page</li><li><span class="swatch tag"></span>Tag</li>${graph.nodes.some((n) => n.kind === 'thought') ? '<li><span class="swatch thought"></span>Thought</li>' : ''}</ul>
   <script type="application/json" id="graph-data">${json(graph)}</script>
 </section>
 
@@ -322,7 +377,8 @@ function explore(ctx) {
   <div id="cloud" class="cloud"></div>
   <div id="word-results" class="word-results" aria-live="polite"></div>
   <script type="application/json" id="words-data">${json(words)}</script>
-</section>`;
+</section>
+${contextSection(ctx)}`;
 
   return layout(ctx, {
     title: 'Explore',
@@ -383,6 +439,84 @@ function notFound(ctx) {
   return layout(ctx, { title: 'Page not found', url: '/404.html', content, bodyClass: 'not-found' });
 }
 
+/* ---------- thoughts ---------- */
+
+const monthLabel = (month) =>
+  new Date(+month.slice(0, 4), +month.slice(5, 7) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
+function thoughtCard(t) {
+  return `<article class="thought" id="${t.id}">
+  <div class="prose compact">${t.html}</div>
+  <footer><a href="${t.url}"><time datetime="${t.stamp.replace(' ', 'T')}">${esc(t.dateText)} · ${esc(t.timeText)}</time></a></footer>
+</article>`;
+}
+
+function monthLinks(months, currentMonth) {
+  if (!months.length) return '';
+  return `<ul class="thought-months">${months
+    .map((m) => `<li><a class="tag${m.month === currentMonth ? ' current' : ''}" href="${m.url}">${esc(monthLabel(m.month))}<span class="count">${m.count}</span></a></li>`)
+    .join('')}</ul>`;
+}
+
+function thoughts(ctx) {
+  const { site, thoughtMonths } = ctx;
+  const all = ctx.thoughts;
+  const shown = all.slice(0, site.thoughtsOnPage || 50);
+  const content = `<header class="article-head">
+  <h1>Thoughts</h1>
+  <p class="lede">Short, unpolished, in the moment. Posts are where things get worked out; this is the stream. <a href="/thoughts.xml">RSS</a></p>
+</header>
+${shown.length ? shown.map(thoughtCard).join('\n') : '<p class="muted">Nothing yet.</p>'}
+${all.length > shown.length ? `<p class="muted small">The latest ${shown.length} of ${all.length}. The rest are in the months below.</p>` : ''}
+${monthLinks(thoughtMonths)}`;
+  return layout(ctx, { title: 'Thoughts', description: `Short notes from ${site.title}.`, url: '/thoughts/', content });
+}
+
+function thoughtsMonth(ctx) {
+  const { thoughtMonths, month } = ctx;
+  const list = ctx.thoughts.filter((t) => t.month === month.month);
+  const label = monthLabel(month.month);
+  const content = `<header class="article-head">
+  <p class="meta"><a href="/thoughts/">Thoughts</a><span class="dot">·</span>${list.length} in ${esc(label)}</p>
+  <h1>${esc(label)}</h1>
+</header>
+${list.map(thoughtCard).join('\n')}
+${monthLinks(thoughtMonths, month.month)}`;
+  return layout(ctx, { title: `Thoughts, ${label}`, description: `Short notes from ${label}.`, url: month.url, content });
+}
+
+function thoughtsFeed(ctx) {
+  const { site } = ctx;
+  const items = ctx.thoughts
+    .slice(0, 50)
+    .map((t) => {
+      const words = t.text.split(/\s+/);
+      const title = words.length > 12 ? `${words.slice(0, 12).join(' ')}…` : t.text;
+      return `
+  <item>
+    <title>${esc(title)}</title>
+    <link>${abs(site, t.url)}</link>
+    <guid isPermaLink="true">${abs(site, t.url)}</guid>
+    <pubDate>${t.date.toUTCString()}</pubDate>
+    <description>${esc(t.text)}</description>
+    <content:encoded><![CDATA[${absolutize(site, t.html).replace(/]]>/g, ']]]]><![CDATA[>')}]]></content:encoded>
+  </item>`;
+    })
+    .join('');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title>${esc(site.title)}: thoughts</title>
+  <link>${abs(site, '/thoughts/')}</link>
+  <description>Short notes from ${esc(site.title)}.</description>
+  <language>${esc(site.language || 'en')}</language>
+  <lastBuildDate>${ctx.buildDate.toUTCString()}</lastBuildDate>
+  <atom:link href="${abs(site, '/thoughts.xml')}" rel="self" type="application/rss+xml"/>${items}
+</channel>
+</rss>
+`;
+}
+
 /* ---------- feeds ---------- */
 
 function feed(ctx) {
@@ -419,13 +553,15 @@ function feed(ctx) {
 }
 
 function sitemap(ctx) {
-  const { site, posts, pages, tags } = ctx;
+  const { site, posts, pages, tags, thoughtMonths = [] } = ctx;
   const today = ctx.buildDate.toISOString().slice(0, 10);
   const urls = [
     { loc: '/', lastmod: today },
     { loc: '/blog/', lastmod: today },
     { loc: '/tags/', lastmod: today },
     { loc: '/explore/', lastmod: today },
+    { loc: '/thoughts/', lastmod: today },
+    ...thoughtMonths.map((m) => ({ loc: m.url, lastmod: today })),
     ...pages.filter((p) => !p.draft).map((p) => ({ loc: p.url, lastmod: p.updated ? p.updated.iso : today })),
     ...posts.filter((p) => !p.draft).map((p) => ({ loc: p.url, lastmod: p.updated ? p.updated.iso : p.isoDate })),
     ...tags.map((t) => ({ loc: t.url, lastmod: today })),
@@ -437,4 +573,4 @@ ${urls.map((u) => `  <url><loc>${abs(site, u.loc)}</loc><lastmod>${u.lastmod}</l
 `;
 }
 
-module.exports = { layout, home, post, page, blog, tags, tag, explore, notFound, feed, sitemap, postList, esc };
+module.exports = { layout, home, post, page, blog, tags, tag, explore, thoughts, thoughtsMonth, thoughtsFeed, notFound, feed, sitemap, postList, esc };

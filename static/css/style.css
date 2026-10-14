@@ -210,11 +210,29 @@ img, svg, video { max-width: 100%; height: auto; }
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
   gap: 3rem; margin-top: 3rem; align-items: start;
 }
-.home-grid .now { position: sticky; top: 5.5rem; }
+.home-side { display: grid; gap: 1.5rem; align-content: start; position: sticky; top: 5.5rem; }
 @media (max-width: 900px) {
   .home-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-  .home-grid .now { position: static; order: -1; }
+  .home-side { position: static; order: -1; }
 }
+
+/* ---------- thoughts ---------- */
+.thought { max-width: var(--measure); padding: 1.1rem 0; border-top: 1px solid var(--line); }
+.thought:last-of-type { border-bottom: 1px solid var(--line); }
+.thought .prose { font-size: 1.02rem; }
+.thought footer { margin-top: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; }
+.thought footer a { color: var(--muted); text-decoration: none; }
+.thought footer a:hover { color: var(--text-strong); }
+.thought:target { box-shadow: inset 3px 0 0 var(--accent); padding-left: 0.9rem; }
+.lately .thought { padding: 0.75rem 0; }
+.lately .thought:first-of-type { border-top: 0; padding-top: 0.25rem; }
+.lately .thought:last-of-type { border-bottom: 0; }
+.lately .thought .prose { font-size: 0.95rem; }
+.thought-months { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; margin: 2rem 0 0; padding: 0; }
+.thought-months .tag { font-size: 0.85rem; padding: 0.35rem 0.8rem; }
+.thought-months .tag.current { color: var(--text-strong); border-color: var(--accent); }
+.thought-months .count { color: var(--muted); margin-left: 0.5em; }
+.swatch.thought { width: 7px; height: 7px; background: var(--muted); opacity: 0.8; }
 
 .card {
   background: color-mix(in srgb, var(--bg-elev) 85%, transparent);
@@ -294,6 +312,23 @@ img, svg, video { max-width: 100%; height: auto; }
 }
 .article-head .meta a { color: var(--muted); }
 .article-head .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+/* the quiet line under a post title: time, place, weather, moon, media */
+.context {
+  display: flex; flex-wrap: wrap; gap: 0.25rem 0; list-style: none; margin: 1rem 0 0; padding: 0.6rem 0 0;
+  border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); line-height: 1.6;
+}
+.context li + li::before { content: "·"; margin-inline: 0.6em; opacity: 0.6; }
+
+.context-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.context-groups h3 { margin: 0 0 0.1rem; font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; color: var(--text-strong); }
+.context-list { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.context-list li { padding: 0.45rem 0; border-top: 1px solid var(--line); }
+.context-list .value { display: block; color: var(--text-strong); }
+.context-list .where { display: block; font-size: 0.82rem; color: var(--muted); }
+.context-list .where a { color: var(--muted); }
+.context-list .where a:hover { color: var(--text-strong); }
+@media (max-width: 760px) { .context-groups { grid-template-columns: 1fr; } }
 .article-head .lede { margin: 0 0 0.75rem; font-size: 1.15rem; }
 
 .prose { max-width: var(--measure); font-size: 1.04rem; }
