@@ -1,0 +1,14 @@
+{
+  "name": "evolutionofexistence.com",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal site and blog for evolutionofexistence.com. Hand-rolled static site generator, zero dependencies.",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node serve.js",
+    "new": "node new-post.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
