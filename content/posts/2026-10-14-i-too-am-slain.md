@@ -1,7 +1,7 @@
 ---
 title: I Too Am Slain
 date: 2026-10-14
-tags: [mind, spirit]
+tags: [mind, spirit, Balance]
 time: 20:33
 place: Emerald Hollow
 weather: 57°F, overcast
