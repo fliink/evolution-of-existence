@@ -3,6 +3,7 @@ title: Hello, world. Again.
 date: 2026-10-14
 tags: [meta, journey]
 summary: A new home on the web, built by hand. Here's what it's for and where things stand.
+draft: true
 ---
 
 Every so often I get the urge to have a place online that is actually *mine*. Not a profile on someone else's platform. Not a feed that decides what matters. Just a domain, some files, and whatever I choose to put in them.
