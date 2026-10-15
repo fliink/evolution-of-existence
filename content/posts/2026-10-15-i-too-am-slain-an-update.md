@@ -3,7 +3,6 @@ title: I Too Am Slain — An Update
 date: 2026-10-15
 tags: [mind, spirit]
 summary: And he didn't make it...
-draft: true
 time: 14:51
 place: Emerald Hollow
 weather: 59°F, overcast
