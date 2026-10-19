@@ -3,6 +3,12 @@ title: The Time Warp of Drinking
 date: 2026-10-19
 tags: [body, Alcohol, mind]
 summary: I've been thinking about why I dislike drinking, and I think the worst consequences don't really show up until I've been drinking regularly.
+time: 10:27
+place: Emerald Hollow
+weather: 49°F, mostly clear
+---
+
+I've been thinking about why I dislike drinking, and I think the worst consequences don't really show up until I've been drinking regularly.
 
 One night of drinking doesn't necessarily feel like a problem. I can have fun, enjoy myself, and wake up the next day feeling mostly fine. But string enough of those nights together and something changes.
 
@@ -20,7 +26,7 @@ My dog hurt her foot last night, and instead of waking up feeling prepared to ta
 
 None of these things is catastrophic. But that's kind of the point.
 
-One night of drinking can become the first domino in a series of choices that move me further away from the life I actually want.
+**One night of drinking can become the first domino in a series of choices that move me further away from the life I actually want.**
 
 And I think that's what bothers me most.
 
@@ -34,11 +40,6 @@ I don't want to spend my life recovering from the way I chose to spend it.
 
 I'm writing this because these feelings are easy to forget once I start feeling better. The disappointment fades, the appeal of drinking returns, and suddenly the consequences don't seem so significant anymore.
 
-I don't want to bury this feeling just because it's uncomfortable. I want to remember it, understand it, and actually learn from it.
+**I don't want to bury this feeling just because it's uncomfortable. I want to remember it, understand it, and actually learn from it.**
 
 Because ultimately, I want to feel like the person making decisions today is looking out for the person who has to live with them tomorrow.
-time: 10:27
-place: Emerald Hollow
-weather: 49°F, mostly clear
----
-
