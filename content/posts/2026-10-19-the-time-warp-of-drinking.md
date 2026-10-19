@@ -37,7 +37,6 @@ I'm writing this because these feelings are easy to forget once I start feeling 
 I don't want to bury this feeling just because it's uncomfortable. I want to remember it, understand it, and actually learn from it.
 
 Because ultimately, I want to feel like the person making decisions today is looking out for the person who has to live with them tomorrow.
-draft: true
 time: 10:27
 place: Emerald Hollow
 weather: 49°F, mostly clear
