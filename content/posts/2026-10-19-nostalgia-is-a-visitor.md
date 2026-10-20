@@ -1,7 +1,7 @@
 ---
 title: Nostalgia Is a Visitor
 date: 2026-10-19
-tags: [spirit]
+tags: [spirit, Nostalgia]
 time: 10:30
 place: Emerald Hollow
 weather: 51°F, clear sky
