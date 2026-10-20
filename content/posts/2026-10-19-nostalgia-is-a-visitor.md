@@ -16,6 +16,9 @@ I'd usually be alone, wandering around the room looking for rainbows, watching t
 
 I still have prisms hanging in my windows today. Every once in a while, the sun hits them just right, and I'm reminded of that little magical world I used to disappear into.
 
+![Light refracting onto my office door](/images/572.jpg)
+
+
 But my relationship with nostalgia hasn't always been a healthy one.
 
 I used to get almost high on nostalgia. I'd immerse myself in it, sometimes adding music to amplify the feeling. It could be incredibly powerful, almost intoxicating.
