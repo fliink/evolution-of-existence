@@ -1,6 +1,7 @@
 ---
 title: A Little Less of Me
 date: 2026-10-19
+tags: [spirit, mind]
 time: 20:54
 place: Emerald Hollow
 weather: 51°F, clear sky
